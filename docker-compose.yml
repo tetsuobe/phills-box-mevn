@@ -1,0 +1,37 @@
+version: '3.6'
+services:
+  node:
+    container_name: phills_node
+    image: node:10-alpine
+    env_file:
+      - .env
+    volumes:
+      - .:/var/www:cached
+    working_dir: /var/www
+    command: sh -c "npm install"
+  mongo:
+    container_name: phills_mongo
+    image: mongo:latest
+    env_file:
+      - .env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${PHILLS_MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${PHILLS_MONGO_PASSWORD}
+    restart: always
+    volumes:
+      - db_data:/data/db
+  mongo-express:
+    container_name: phills_mongo_gui
+    image: mongo-express
+    restart: always
+    depends_on:
+      - mongo
+    ports:
+      - 8081:8081
+    env_file:
+      - .env
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${PHILLS_MONGO_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${PHILLS_MONGO_PASSWORD}
+volumes:
+  db_data:
